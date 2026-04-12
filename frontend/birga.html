@@ -858,7 +858,7 @@
 
     async function checkAuth() {
         try {
-            await apiRequest('/api/user/profile');
+            await apiRequest('https://meme-exchange-backend.onrender.com/api/user/profile')
             return true;
         } catch (e) {
             window.location.href = '/login.html';
@@ -868,7 +868,7 @@
 
     async function loadBalance() {
         try {
-            const data = await apiRequest('/api/user/balance');
+            const data = await apiRequest('https://meme-exchange-backend.onrender.com/api/user/balance')
             document.getElementById('balanceDisplay').innerHTML = `<i class="fas fa-coins"></i> ${data.balance.toLocaleString()} MC`;
             return data.balance;
         } catch (e) {
@@ -892,7 +892,7 @@
     let memes = [];
 
     async function loadMemes() {
-        memes = await apiRequest('/api/memes');
+        memes = await apiRequest('https://meme-exchange-backend.onrender.com/api/memes')
         renderAssets();
         updateMarketStats();
     }
@@ -1058,7 +1058,7 @@
 
     async function loadHistory() {
         try {
-            const history = await apiRequest('/api/portfolio/history');
+            const history = await apiRequest('https://meme-exchange-backend.onrender.com/api/portfolio/history')
             const container = document.getElementById('tradeHistoryList');
             
             if (!history.length) {
@@ -1107,8 +1107,8 @@
         const amount = parseFloat(document.getElementById('modalAmount').value);
         if (isNaN(amount) || amount <= 0) { showToast('Введите корректное количество', false); return; }
         try {
-            if (currentModalType === 'buy') await apiRequest('/api/trades/buy', 'POST', { memeId: currentModalAsset.id, quantity: amount });
-            else await apiRequest('/api/trades/sell', 'POST', { memeId: currentModalAsset.id, quantity: amount });
+            if (currentModalType === 'buy') await apiRequest('https://meme-exchange-backend.onrender.com/api/trades/buy', 'POST', ...)
+            else await apiRequest('https://meme-exchange-backend.onrender.com/api/trades/sell', 'POST', ...)
             showToast(`✅ ${currentModalType==='buy'?'Куплено':'Продано'} ${amount} ${currentModalAsset.name}`, true);
             await loadBalance(); await loadMemes(); await loadHistory(); closeModal();
         } catch (e) { showToast(e.message, false); }
