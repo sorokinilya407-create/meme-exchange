@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MEME XCHANGE — Кланы | Войны, рейтинг, инвестиции</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A0A0F;
+            --bg-secondary: #111117;
+            --bg-tertiary: #0D0D12;
+            --accent-green: #00FF88;
+            --accent-purple: #9D4EDD;
+            --accent-red: #FF3366;
+            --accent-yellow: #FFD966;
+            --text-primary: #EDEDED;
+            --text-secondary: #7A7A8C;
+            --border-dark: #23232E;
+            --border-light: #2A2A35;
+            --glass-bg: rgba(17, 17, 23, 0.7);
+            --glass-border: rgba(0, 255, 136, 0.2);
+            --shadow-glow: 0 0 40px rgba(0, 255, 136, 0.15);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --gradient-hero: linear-gradient(135deg, #00FF88 0%, #9D4EDD 50%, #FF3366 100%);
+            --gradient-card: linear-gradient(145deg, #111117 0%, #0D0D12 100%);
+        }
+
+        body {
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 70%, rgba(157, 78, 221, 0.04) 0%, transparent 40%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            padding: 0 20px 40px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, transparent 0px, transparent 3px, rgba(0, 255, 136, 0.01) 3px, rgba(0, 255, 136, 0.01) 6px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 20px 0;
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--border-dark);
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            z-index: 100;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            background: var(--gradient-hero);
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--bg-primary);
+            box-shadow: var(--shadow-glow);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFFFFF, var(--accent-green));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 24px;
+            border-radius: 60px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-card);
+        }
+
+        .balance {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--accent-green);
+            font-size: 1.4rem;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .balance i {
+            color: var(--accent-yellow);
+            margin-right: 8px;
+        }
+
+        .avatar {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-green));
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            font-size: 1.2rem;
+        }
+
+        .avatar:hover {
+            transform: scale(1.1);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Clan Stats Bar */
+        .clan-stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 28px;
+            padding: 16px 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 60px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .clan-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+        }
+
+        .clan-stat i {
+            color: var(--accent-purple);
+            font-size: 1.2rem;
+        }
+
+        .clan-stat strong {
+            color: var(--text-primary);
+            margin-left: 4px;
+        }
+
+        /* Main Grid */
+        .clans-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 28px;
+            margin-bottom: 32px;
+        }
+
+        /* Clans List */
+        .clans-list-section {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 32px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .section-header {
+            padding: 20px 24px 16px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-dark);
+            background: rgba(0, 255, 136, 0.02);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-header i {
+            color: var(--accent-green);
+        }
+
+        .clans-list {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .clan-card {
+            background: rgba(13, 13, 18, 0.6);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid var(--border-dark);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .clan-card:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(157, 78, 221, 0.15);
+            background: rgba(157, 78, 221, 0.03);
+        }
+
+        .clan-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 16px;
+        }
+
+        .clan-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--border-dark), var(--bg-primary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            border: 2px solid var(--accent-purple);
+            box-shadow: 0 4px 15px rgba(157, 78, 221, 0.2);
+        }
+
+        .clan-info h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .clan-tag {
+            font-size: 0.8rem;
+            background: var(--accent-purple);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .clan-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-primary);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-dark);
+        }
+
+        .stat-item i {
+            color: var(--accent-green);
+            font-size: 0.9rem;
+        }
+
+        .rank-badge-clan {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: var(--bg-primary);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .btn-join {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 8px;
+            font-size: 0.95rem;
+        }
+
+        .btn-join:hover {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            transform: scale(1.02);
+        }
+
+        .btn-join.in-clan {
+            background: rgba(157, 78, 221, 0.1);
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+            cursor: default;
+        }
+
+        .btn-join.in-clan:hover {
+            background: rgba(157, 78, 221, 0.1);
+            transform: none;
+        }
+
+        /* Right Panel */
+        .right-clan-section {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* War Card */
+        .war-card {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.05), rgba(157, 78, 221, 0.05));
+            border-radius: 32px;
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .war-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 51, 102, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .war-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--accent-red);
+        }
+
+        .war-teams {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .team-war {
+            flex: 1;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 24px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .team-icon-large {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .team-war h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .team-score-large {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent-yellow);
+        }
+
+        .progress-war {
+            background: var(--border-dark);
+            border-radius: 20px;
+            height: 16px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .progress-fill-left {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), #00cc66);
+            transition: width 0.5s ease;
+        }
+
+        .progress-fill-right {
+            height: 100%;
+            background: linear-gradient(90deg, #b86eff, var(--accent-purple));
+            transition: width 0.5s ease;
+        }
+
+        .prize-pool {
+            background: rgba(157, 78, 221, 0.15);
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid rgba(157, 78, 221, 0.3);
+        }
+
+        .prize-pool i {
+            color: var(--accent-yellow);
+            margin-right: 8px;
+        }
+
+        .prize-pool strong {
+            font-size: 1.3rem;
+            color: var(--accent-yellow);
+        }
+
+        .btn-war {
+            background: linear-gradient(135deg, var(--accent-red), #cc0033);
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-war:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+        }
+
+        .btn-war:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Invest Card */
+        .invest-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 28px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .invest-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .invest-card h3 i {
+            color: var(--accent-green);
+        }
+
+        .invest-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .invest-table th {
+            text-align: left;
+            padding: 12px 8px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .invest-table td {
+            padding: 14px 8px;
+            border-bottom: 1px solid rgba(30, 30, 40, 0.5);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-invest {
+            background: var(--accent-purple);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .btn-invest:hover {
+            background: #b86eff;
+            transform: scale(1.05);
+        }
+
+        /* Create Clan Card */
+        .create-clan-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 28px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .create-clan-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .create-clan-card h3 i {
+            color: var(--accent-purple);
+        }
+
+        .create-form input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            padding: 14px 18px;
+            border-radius: 50px;
+            color: var(--text-primary);
+            margin: 10px 0;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .create-form input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+        }
+
+        .cost-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 12px 0;
+            color: var(--text-secondary);
+        }
+
+        .cost-info i {
+            color: var(--accent-yellow);
+        }
+
+        .btn-create {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            font-weight: 800;
+            width: 100%;
+            padding: 14px;
+            border-radius: 50px;
+            border: none;
+            margin-top: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-create:hover {
+            background: #00cc66;
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.2);
+        }
+
+        /* Chat Card */
+        .chat-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 28px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .chat-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-card h3 i {
+            color: var(--accent-green);
+        }
+
+        .chat-messages {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 16px;
+            height: 200px;
+            overflow-y: auto;
+            margin: 16px 0;
+            border: 1px solid var(--border-dark);
+        }
+
+        .chat-message {
+            padding: 8px 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(30, 30, 40, 0.3);
+        }
+
+        .chat-message:last-child {
+            border-bottom: none;
+        }
+
+        .chat-message strong {
+            color: var(--accent-purple);
+            margin-right: 8px;
+        }
+
+        .chat-time {
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            margin-left: 8px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            padding: 12px 18px;
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .chat-input-area button {
+            background: var(--accent-purple);
+            border: none;
+            padding: 0 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input-area button:hover {
+            background: #b86eff;
+            transform: scale(1.05);
+        }
+
+        /* Create Clan Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--gradient-card);
+            border: 1px solid var(--accent-purple);
+            border-radius: 32px;
+            padding: 32px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: var(--shadow-glow), var(--shadow-card);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .modal-content p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 14px 18px;
+            width: 100%;
+            border-radius: 50px;
+            margin: 12px 0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-confirm {
+            background: var(--accent-green);
+            border: none;
+            color: var(--bg-primary);
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm:hover {
+            background: #00cc66;
+            transform: scale(1.02);
+        }
+
+        .btn-cancel {
+            background: var(--border-light);
+            border: none;
+            color: var(--text-primary);
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: #3A3A45;
+        }
+
+        /* Navigation */
+        .quick-nav {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-dark);
+        }
+
+        .quick-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 40px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-nav a:hover {
+            color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            padding: 16px 28px;
+            border-radius: 60px;
+            font-weight: 700;
+            z-index: 9999;
+            animation: slideIn 0.4s ease;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .text-muted {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Scrollbar */
+        .clans-list::-webkit-scrollbar,
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .clans-list::-webkit-scrollbar-track,
+        .chat-messages::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 10px;
+        }
+
+        .clans-list::-webkit-scrollbar-thumb,
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border-dark);
+            border-radius: 10px;
+        }
+
+        .clans-list::-webkit-scrollbar-thumb:hover,
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-green);
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .clans-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0 12px 40px;
+            }
+
+            .logo h1 {
+                font-size: 20px;
+            }
+
+            .clan-stats-bar {
+                flex-wrap: wrap;
+            }
+
+            .war-teams {
+                flex-direction: column;
+            }
+
+            .vs-divider {
+                justify-content: center;
+            }
+
+            .quick-nav {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">⚔️</div>
+            <h1>MEME XCHANGE · КЛАНЫ</h1>
+        </div>
+        <div class="user-panel">
+            <div class="balance" id="balanceDisplay">
+                <i class="fas fa-coins"></i> -- MC
+            </div>
+            <div class="avatar">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clan Stats Bar -->
+    <div class="clan-stats-bar">
+        <div class="clan-stat">
+            <i class="fas fa-flag"></i>
+            <span>Всего кланов: <strong id="totalClans">0</strong></span>
+        </div>
+        <div class="clan-stat">
+            <i class="fas fa-users"></i>
+            <span>Участников: <strong id="totalMembers">0</strong></span>
+        </div>
+        <div class="clan-stat">
+            <i class="fas fa-trophy"></i>
+            <span>Призовой фонд войн: <strong id="warPrizePool">0 MC</strong></span>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="clans-grid">
+        <!-- Left: Clans List -->
+        <div class="clans-list-section">
+            <div class="section-header">
+                <i class="fas fa-flag-checkered"></i> Существующие кланы
+            </div>
+            <div class="clans-list" id="clansList">
+                <div class="text-muted" style="padding: 40px; text-align: center;">Загрузка...</div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-clan-section">
+            <!-- Active War -->
+            <div class="war-card">
+                <div class="war-title">
+                    <i class="fas fa-skull-crossbones"></i> АКТИВНАЯ ВОЙНА
+                </div>
+                <div id="warContent">
+                    <div class="text-muted" style="padding: 20px; text-align: center;">Загрузка...</div>
+                </div>
+                <button class="btn-war" id="joinWarActiveBtn">
+                    <i class="fas fa-fire"></i> Вступить в битву
+                </button>
+            </div>
+
+            <!-- Investments -->
+            <div class="invest-card">
+                <h3><i class="fas fa-chart-line"></i> Инвестиции в кланы</h3>
+                <table class="invest-table">
+                    <thead>
+                        <tr><th>Клан</th><th>Цена</th><th>Изм.</th><th></th></tr>
+                    </thead>
+                    <tbody id="investBody">
+                        <tr><td colspan="4" class="text-muted" style="text-align: center; padding: 20px;">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Create Clan -->
+            <div class="create-clan-card">
+                <h3><i class="fas fa-plus-circle"></i> Создать свой клан</h3>
+                <div class="create-form">
+                    <input type="text" id="clanNameInput" placeholder="Название клана" maxlength="50">
+                    <input type="text" id="clanAvatarInput" placeholder="Эмодзи (например: 🐉)" maxlength="2" value="🏰">
+                    <div class="cost-info">
+                        <i class="fas fa-coins"></i>
+                        <span>Стоимость создания: <strong>5,000 MC</strong></span>
+                    </div>
+                    <button class="btn-create" id="createClanBtn">
+                        <i class="fas fa-crown"></i> Создать клан
+                    </button>
+                </div>
+            </div>
+
+            <!-- Clan Chat -->
+            <div class="chat-card">
+                <h3><i class="fas fa-comments"></i> Клановый чат</h3>
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="Напиши в чат...">
+                    <button id="sendChatBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="quick-nav">
+                <a href="birga.html"><i class="fas fa-chart-line"></i> Биржа</a>
+                <a href="index.html"><i class="fas fa-home"></i> Главная</a>
+                <a href="leaders.html"><i class="fas fa-trophy"></i> Топ</a>
+                <a href="portfolio.html"><i class="fas fa-wallet"></i> Портфель</a>
+                <a href="deposit.html"><i class="fas fa-gem"></i> Пополнение</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showToast(msg, success = true) {
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.style.background = success ? '#00FF88' : '#FF3366';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    async function apiRequest(url, method = 'GET', body = null) {
+    const fullUrl = url.startsWith('/api') ? 'https://meme-exchange-backend.onrender.com' + url : url;
+    const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(fullUrl, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '������');
+    return data;
+} };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(fullUrl, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '������');
+    return data;
+} };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(url, opts);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Ошибка');
+        return data;
+    }
+
+    async function checkAuth() {
+        try {
+            await apiRequest('/api/user/profile');
+            return true;
+        } catch (e) {
+            window.location.href = '/login.html';
+            return false;
+        }
+    }
+
+    async function loadBalance() {
+        try {
+            const data = await apiRequest('/api/user/balance');
+            document.getElementById('balanceDisplay').innerHTML = `<i class="fas fa-coins"></i> ${data.balance.toLocaleString()} MC`;
+            return data.balance;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    let currentUserClan = null;
+    let clansData = [];
+
+    async function loadClans() {
+        try {
+            clansData = await apiRequest('/api/clans');
+            const container = document.getElementById('clansList');
+            
+            if (!clansData.length) {
+                container.innerHTML = '<div class="text-muted" style="padding: 40px; text-align: center;">Нет кланов. Создайте первый!</div>';
+                return;
+            }
+            
+            // Сортируем по капиталу
+            clansData.sort((a, b) => (b.capital || 0) - (a.capital || 0));
+            
+            container.innerHTML = clansData.map((c, idx) => {
+                const rank = idx + 1;
+                let rankBadge = '';
+                if (rank === 1) rankBadge = '<span class="rank-badge-clan"><i class="fas fa-crown"></i> #1</span>';
+                else if (rank === 2) rankBadge = '<span class="rank-badge-clan" style="background: #C0C0C0;">#2</span>';
+                else if (rank === 3) rankBadge = '<span class="rank-badge-clan" style="background: #CD7F32;">#3</span>';
+                
+                const isUserInThisClan = currentUserClan === c.id;
+                
+                return `
+                    <div class="clan-card">
+                        <div class="clan-header">
+                            <div class="clan-avatar">${c.avatar || '🏰'}</div>
+                            <div class="clan-info">
+                                <h3>${c.name} ${rankBadge}</h3>
+                            </div>
+                        </div>
+                        <div class="clan-stats">
+                            <span class="stat-item"><i class="fas fa-user"></i> ${c.members_count || 1}</span>
+                            <span class="stat-item"><i class="fas fa-coins"></i> ${(c.capital || 0).toLocaleString()} MC</span>
+                            <span class="stat-item"><i class="fas fa-trophy"></i> ${c.wins || 0} побед</span>
+                        </div>
+                        <button class="btn-join ${isUserInThisClan ? 'in-clan' : ''}" data-id="${c.id}" ${isUserInThisClan ? 'disabled' : ''}>
+                            ${isUserInThisClan ? '<i class="fas fa-check"></i> Вы в клане' : '<i class="fas fa-door-open"></i> Вступить в клан'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update stats
+            const totalMembers = clansData.reduce((sum, c) => sum + (c.members_count || 1), 0);
+            document.getElementById('totalClans').textContent = clansData.length;
+            document.getElementById('totalMembers').textContent = totalMembers;
+            
+            // Event listeners for join buttons
+            document.querySelectorAll('.btn-join:not(.in-clan)').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = parseInt(btn.dataset.id);
+                    try {
+                        await apiRequest('/api/clans/join', 'POST', { clanId: id });
+                        showToast('Вы вступили в клан!', true);
+                        await loadUserClan();
+                        await loadClans();
+                    } catch (e) {
+                        showToast(e.message, false);
+                    }
+                });
+            });
+            
+        } catch (e) {
+            console.error('Load clans error:', e);
+        }
+    }
+
+    async function loadUserClan() {
+        try {
+            const user = await apiRequest('/api/user/profile');
+            currentUserClan = user.clan_id;
+        } catch (e) {
+            currentUserClan = null;
+        }
+    }
+
+    async function loadWar() {
+        try {
+            const war = await apiRequest('/api/clans/war');
+            const container = document.getElementById('warContent');
+            
+            if (war.active) {
+                const total = war.clan1_score + war.clan2_score;
+                const leftPercent = total > 0 ? (war.clan1_score / total) * 100 : 50;
+                const rightPercent = 100 - leftPercent;
+                
+                document.getElementById('warPrizePool').textContent = (war.prize_pool || 0).toLocaleString() + ' MC';
+                
+                container.innerHTML = `
+                    <div class="war-teams">
+                        <div class="team-war">
+                            <div class="team-icon-large">🐸</div>
+                            <h3 style="color: #00FF88;">${war.clan1.name}</h3>
+                            <div class="team-score-large" style="color: #00FF88;">${war.clan1_score}</div>
+                        </div>
+                        <div class="vs-divider">VS</div>
+                        <div class="team-war">
+                            <div class="team-icon-large">🍄</div>
+                            <h3 style="color: #9D4EDD;">${war.clan2.name}</h3>
+                            <div class="team-score-large" style="color: #9D4EDD;">${war.clan2_score}</div>
+                        </div>
+                    </div>
+                    <div class="progress-war">
+                        <div class="progress-fill-left" style="width: ${leftPercent}%;"></div>
+                        <div class="progress-fill-right" style="width: ${rightPercent}%;"></div>
+                    </div>
+                    <div class="prize-pool">
+                        <i class="fas fa-gem"></i> Призовой фонд: <strong>${war.prize_pool} MC</strong>
+                        <div class="text-muted" style="margin-top: 8px;">
+                            <i class="far fa-clock"></i> До конца: ${new Date(war.ends_at).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('joinWarActiveBtn').disabled = !currentUserClan;
+                if (!currentUserClan) {
+                    document.getElementById('joinWarActiveBtn').title = 'Вступите в клан, чтобы участвовать';
+                }
+            } else {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px;">
+                        <i class="fas fa-dove" style="font-size: 48px; color: var(--text-secondary); margin-bottom: 16px;"></i>
+                        <p>Нет активной войны</p>
+                        <p class="text-muted" style="margin-top: 8px;">Войны начинаются автоматически между топ-кланами</p>
+                    </div>
+                `;
+                document.getElementById('joinWarActiveBtn').disabled = true;
+            }
+        } catch (e) {
+            console.error('Load war error:', e);
+        }
+    }
+
+    async function loadInvestments() {
+        try {
+            const tbody = document.getElementById('investBody');
+            
+            if (!clansData.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted" style="text-align: center; padding: 20px;">Нет кланов</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = clansData.slice(0, 3).map(c => {
+                const change = Math.floor(Math.random() * 20) - 5;
+                const changeClass = change >= 0 ? 'change-positive' : 'change-negative';
+                const changeSign = change >= 0 ? '+' : '';
+                
+                return `
+                    <tr>
+                        <td>${c.avatar || '🏰'} ${c.name}</td>
+                        <td>${Math.floor((c.capital || 0) / 1000)}K MC</td>
+                        <td class="${changeClass}">${changeSign}${change}%</td>
+                        <td><button class="btn-invest" data-id="${c.id}">Купить</button></td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.querySelectorAll('.btn-invest').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showToast('Инвестиции скоро будут доступны!', true);
+                });
+            });
+        } catch (e) {
+            console.error('Load investments error:', e);
+        }
+    }
+
+    // Chat
+    let chatMessages = [
+        { user: '🐸 FrogKing', msg: 'Завтра атакуем! Кто с нами?', time: '10:30' },
+        { user: '🍄 MushLord', msg: 'Мы готовы! Ждите!', time: '10:32' },
+        { user: '🐉 Dragon', msg: 'Новый клан создан! Вступайте!', time: '10:45' },
+        { user: 'Система', msg: 'Клан "FrogArmy" выиграл войну! +5000 MC', time: '11:00' }
+    ];
+
+    function renderChat() {
+        const div = document.getElementById('chatMessages');
+        div.innerHTML = chatMessages.slice(-20).map(m => `
+            <div class="chat-message">
+                <strong>${escapeHtml(m.user)}:</strong>
+                <span>${escapeHtml(m.msg)}</span>
+                <span class="chat-time">${m.time}</span>
+            </div>
+        `).join('');
+        div.scrollTop = div.scrollHeight;
+    }
+
+    function escapeHtml(s) {
+        return s.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function initChat() {
+        const sendBtn = document.getElementById('sendChatBtn');
+        const input = document.getElementById('chatInput');
+        
+        sendBtn.onclick = () => {
+            const msg = input.value.trim();
+            if (!msg) return;
+            
+            const now = new Date();
+            const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            chatMessages.push({ user: 'Вы', msg, time });
+            renderChat();
+            input.value = '';
+            
+            // Simulate response
+            setTimeout(() => {
+                const responses = ['👋', 'Привет!', 'Кто в клан?', 'Го в войну!', '🫡'];
+                const randomUser = ['🐸 FrogKing', '🍄 MushLord', '🐉 Dragon', '⚡ Warrior'][Math.floor(Math.random() * 4)];
+                chatMessages.push({ 
+                    user: randomUser, 
+                    msg: responses[Math.floor(Math.random() * responses.length)], 
+                    time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                });
+                renderChat();
+            }, 1000 + Math.random() * 2000);
+        };
+        
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') sendBtn.click();
+        };
+        
+        renderChat();
+    }
+
+    function initCreateClan() {
+        const createBtn = document.getElementById('createClanBtn');
+        const nameInput = document.getElementById('clanNameInput');
+        const avatarInput = document.getElementById('clanAvatarInput');
+        
+        // Random emoji suggestion
+        avatarInput.addEventListener('focus', () => {
+            if (!avatarInput.value.trim() || avatarInput.value === '🏰') {
+                const emojis = ['🏰', '🐉', '⚔️', '🛡️', '👑', '🔥', '💎', '🌟', '🦅', '🐺'];
+                avatarInput.value = emojis[Math.floor(Math.random() * emojis.length)];
+            }
+        });
+        
+        createBtn.addEventListener('click', async () => {
+            const name = nameInput.value.trim();
+            let avatar = avatarInput.value.trim();
+            
+            if (!name) {
+                showToast('Введите название клана', false);
+                return;
+            }
+            
+            if (name.length < 3) {
+                showToast('Название должно быть не менее 3 символов', false);
+                return;
+            }
+            
+            if (!avatar) {
+                avatar = '🏰';
+            }
+            
+            createBtn.disabled = true;
+            createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создание...';
+            
+            try {
+                await apiRequest('/api/clans/create', 'POST', { name, avatar });
+                showToast(`Клан "${name}" создан!`, true);
+                nameInput.value = '';
+                avatarInput.value = '🏰';
+                await loadUserClan();
+                await loadClans();
+                await loadInvestments();
+            } catch (e) {
+                showToast(e.message, false);
+            } finally {
+                createBtn.disabled = false;
+                createBtn.innerHTML = '<i class="fas fa-crown"></i> Создать клан';
+            }
+        });
+        
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') createBtn.click();
+        });
+    }
+
+    async function init() {
+        if (!await checkAuth()) return;
+        
+        await loadBalance();
+        await loadUserClan();
+        await loadClans();
+        await loadWar();
+        await loadInvestments();
+        initChat();
+        initCreateClan();
+        
+        document.getElementById('joinWarActiveBtn').addEventListener('click', () => {
+            if (!currentUserClan) {
+                showToast('Вступите в клан, чтобы участвовать в войне!', false);
+                return;
+            }
+            showToast('Вы вступили в битву! Совершайте сделки на бирже.', true);
+        });
+        
+        setInterval(async () => {
+            await loadClans();
+            await loadWar();
+        }, 30000);
+    }
+
+    init();
+    // Универсальная функция получения иконки мема (эмодзи или картинка)
+function getMemeDisplay(meme) {
+    const savedImage = localStorage.getItem(`meme_img_${meme.name}`);
+    if (savedImage) {
+        return `<img src="${savedImage}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
+    }
+    return meme.icon || '📦';
+}
+</script>
+</body>
+</html>
+
+
