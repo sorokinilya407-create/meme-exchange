@@ -3,7 +3,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('https://meme-exchange-backend.onrender.com/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -27,7 +27,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
     try {
-        const res = await fetch('/api/auth/register', {
+        const res = await fetch('https://meme-exchange-backend.onrender.com/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
