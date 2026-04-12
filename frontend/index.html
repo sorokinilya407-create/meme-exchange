@@ -1144,7 +1144,7 @@
 </div>
 
 <script>
-    // ========== Ð’Ð¡ÐŸÐžÐœÐžÐ“ÐÐ¢Ð•Ð›Ð¬ÐÐ«Ð• Ð¤Ð£ÐÐšÐ¦Ð˜Ð˜ ==========
+    // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
     function showToast(msg, isSuccess = true) {
         const t = document.createElement('div');
         t.className = 'toast';
@@ -1155,24 +1155,12 @@
     }
 
     async function apiRequest(url, method = 'GET', body = null) {
-    const fullUrl = url.startsWith('/api') ? 'https://meme-exchange-backend.onrender.com' + url : url;
-    const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
-    if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(fullUrl, opts);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Îøèáêà');
-    return data;
-} };
-    if (body) opts.body = JSON.stringify(body);
-    const res = await fetch(fullUrl, opts);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Îøèáêà');
-    return data;
-} };
+        const fullUrl = url.startsWith('/api') ? 'https://meme-exchange-backend.onrender.com' + url : url;
+        const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
         if (body) opts.body = JSON.stringify(body);
-        const res = await fetch(url, opts);
+        const res = await fetch(fullUrl, opts);
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'ÐžÑˆÐ¸Ð±ÐºÐ°');
+        if (!res.ok) throw new Error(data.error || 'Ошибка');
         return data;
     }
 
@@ -1196,26 +1184,23 @@
         }
     }
 
-    // ========== Ð¤Ð£ÐÐšÐ¦Ð˜Ð¯ ÐžÐ¢ÐžÐ‘Ð ÐÐ–Ð•ÐÐ˜Ð¯ ÐšÐÐ Ð¢Ð˜ÐÐšÐ˜ ==========
     function getMemeDisplay(meme) {
         if (meme.image_url) {
             return `<img src="${meme.image_url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
         }
-        return meme.icon || 'ðŸ“¦';
+        return meme.icon || '📦';
     }
 
-    // ========== ÐŸÐ•Ð Ð•ÐœÐ•ÐÐÐ«Ð• Ð”Ð›Ð¯ ÐœÐžÐ”ÐÐ›ÐšÐ˜ ==========
     let selectedImageData = null;
     let memeType = 'emoji';
 
-    // ========== Ð—ÐÐ“Ð Ð£Ð—ÐšÐ ÐœÐ•ÐœÐžÐ’ ==========
     async function loadMemes() {
         try {
             const memes = await apiRequest('/api/memes');
             const container = document.getElementById('memesContainer');
             
             if (!memes.length) {
-                container.innerHTML = '<div class="text-muted" style="padding: 20px; text-align: center;">ÐÐµÑ‚ Ð¼ÐµÐ¼Ð¾Ð². Ð¡Ð¾Ð·Ð´Ð°Ð¹Ñ‚Ðµ Ð¿ÐµÑ€Ð²Ñ‹Ð¹!</div>';
+                container.innerHTML = '<div class="text-muted" style="padding: 20px; text-align: center;">Нет мемов. Создайте первый!</div>';
                 return;
             }
             
@@ -1236,16 +1221,16 @@
                             <div class="meme-price-info">
                                 <div class="meme-price">${isNaN(price) ? 0 : price.toFixed(0)} MC</div>
                                 <div class="meme-change ${change >= 0 ? 'change-positive' : 'change-negative'}">
-                                    ${change >= 0 ? 'â–²' : 'â–¼'} ${isNaN(change) ? '0.0' : Math.abs(change).toFixed(1)}%
+                                    ${change >= 0 ? '▲' : '▼'} ${isNaN(change) ? '0.0' : Math.abs(change).toFixed(1)}%
                                 </div>
                             </div>
                         </div>
                         <div class="trade-buttons">
                             <button class="btn-buy" data-id="${m.id}" data-price="${price}">
-                                <i class="fas fa-arrow-up"></i> ÐšÑƒÐ¿Ð¸Ñ‚ÑŒ
+                                <i class="fas fa-arrow-up"></i> Купить
                             </button>
                             <button class="btn-sell" data-id="${m.id}">
-                                <i class="fas fa-arrow-down"></i> ÐŸÑ€Ð¾Ð´Ð°Ñ‚ÑŒ
+                                <i class="fas fa-arrow-down"></i> Продать
                             </button>
                         </div>
                     </div>
@@ -1258,7 +1243,7 @@
                     const price = parseFloat(btn.dataset.price);
                     try {
                         await apiRequest('/api/trades/buy', 'POST', { memeId, quantity: 1 });
-                        showToast(`âœ… ÐšÑƒÐ¿Ð»ÐµÐ½Ð¾ Ð·Ð° ${price.toFixed(0)} MC`, true);
+                        showToast(`✅ Куплено за ${price.toFixed(0)} MC`, true);
                         loadBalance();
                         loadMemes();
                     } catch (err) {
@@ -1268,21 +1253,20 @@
             });
             
             document.querySelectorAll('.btn-sell').forEach(btn => {
-                btn.addEventListener('click', () => showToast('ÐŸÑ€Ð¾Ð´Ð°Ð¶Ð° Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ð° Ð² Ð¿Ð¾Ñ€Ñ‚Ñ„ÐµÐ»Ðµ', false));
+                btn.addEventListener('click', () => showToast('Продажа доступна в портфеле', false));
             });
         } catch (e) {
             console.error('Load memes error:', e);
         }
     }
 
-    // ========== Ð—ÐÐ“Ð Ð£Ð—ÐšÐ Ð¢ÐžÐŸ Ð¢Ð Ð•Ð™Ð”Ð•Ð ÐžÐ’ ==========
     async function loadTopTraders() {
         try {
             const data = await apiRequest('/api/leaders/capital');
             const container = document.getElementById('topTradersList');
             
             if (!data.length) {
-                container.innerHTML = '<li><div class="text-muted" style="padding: 20px; text-align: center;">ÐÐµÑ‚ Ð´Ð°Ð½Ð½Ñ‹Ñ…</div></li>';
+                container.innerHTML = '<li><div class="text-muted" style="padding: 20px; text-align: center;">Нет данных</div></li>';
                 return;
             }
             
@@ -1319,7 +1303,6 @@
         }
     }
 
-    // ========== Ð—ÐÐ“Ð Ð£Ð—ÐšÐ ÐšÐ›ÐÐÐžÐ’ÐžÐ™ Ð’ÐžÐ™ÐÐ« ==========
     async function loadClanWar() {
         try {
             const war = await apiRequest('/api/clans/war');
@@ -1337,12 +1320,12 @@
                         </div>
                         <div class="war-teams">
                             <div class="team">
-                                <div class="team-icon">ðŸ¸</div>
+                                <div class="team-icon">🐸</div>
                                 <div class="team-name">${war.clan1.name}</div>
                                 <div class="team-score" style="color: #00FF88;">${war.clan1_score}</div>
                             </div>
                             <div class="team">
-                                <div class="team-icon">ðŸ„</div>
+                                <div class="team-icon">🍄</div>
                                 <div class="team-name">${war.clan2.name}</div>
                                 <div class="team-score" style="color: #9D4EDD;">${war.clan2_score}</div>
                             </div>
@@ -1351,23 +1334,23 @@
                             <div class="war-progress" style="width: ${percent}%;"></div>
                         </div>
                         <div class="war-footer">
-                            <span><i class="fas fa-users"></i> 24 ÑƒÑ‡Ð°ÑÑ‚Ð½Ð¸ÐºÐ°</span>
+                            <span><i class="fas fa-users"></i> 24 участника</span>
                             <button class="btn-war" id="joinWarBtn">
-                                <i class="fas fa-fire"></i> Ð’ÑÑ‚ÑƒÐ¿Ð¸Ñ‚ÑŒ Ð² Ð±Ð¸Ñ‚Ð²Ñƒ
+                                <i class="fas fa-fire"></i> Вступить в битву
                             </button>
                         </div>
                     </div>
                 `;
                 
                 document.getElementById('joinWarBtn')?.addEventListener('click', () => {
-                    showToast('Ð’Ñ‹ Ð²ÑÑ‚ÑƒÐ¿Ð¸Ð»Ð¸ Ð² Ð±Ð¸Ñ‚Ð²Ñƒ! Ð¡Ð¾Ð²ÐµÑ€ÑˆÐ°Ð¹Ñ‚Ðµ ÑÐ´ÐµÐ»ÐºÐ¸ Ð½Ð° Ð±Ð¸Ñ€Ð¶Ðµ.', true);
+                    showToast('Вы вступили в битву! Совершайте сделки на бирже.', true);
                 });
             } else {
                 container.innerHTML = `
                     <div class="clan-war" style="text-align: center; padding: 30px;">
                         <i class="fas fa-dove" style="font-size: 40px; color: var(--text-secondary); margin-bottom: 16px;"></i>
-                        <p>ÐÐµÑ‚ Ð°ÐºÑ‚Ð¸Ð²Ð½Ñ‹Ñ… Ð²Ð¾Ð¹Ð½</p>
-                        <p class="text-muted" style="margin-top: 8px;">Ð¡Ð¾Ð·Ð´Ð°Ð¹Ñ‚Ðµ ÐºÐ»Ð°Ð½ Ð¸ Ð½Ð°Ñ‡Ð½Ð¸Ñ‚Ðµ Ð²Ð¾Ð¹Ð½Ñƒ!</p>
+                        <p>Нет активных войн</p>
+                        <p class="text-muted" style="margin-top: 8px;">Создайте клан и начните войну!</p>
                     </div>
                 `;
             }
@@ -1376,26 +1359,25 @@
         }
     }
 
-    // ========== Ð—ÐÐ“Ð Ð£Ð—ÐšÐ ÐÐšÐ¦Ð˜Ð™ ÐšÐ›ÐÐÐžÐ’ ==========
     async function loadClanStocks() {
         try {
             const clans = await apiRequest('/api/clans');
             const container = document.getElementById('clanStocks');
             
             if (!clans.length) {
-                container.innerHTML = '<div class="text-muted" style="padding: 10px;">ÐÐµÑ‚ ÐºÐ»Ð°Ð½Ð¾Ð²</div>';
+                container.innerHTML = '<div class="text-muted" style="padding: 10px;">Нет кланов</div>';
                 return;
             }
             
             container.innerHTML = clans.slice(0, 3).map(c => `
                 <div class="clan-stock-item">
                     <div class="stock-name">
-                        <span>${c.avatar || 'ðŸ°'}</span>
+                        <span>${c.avatar || '🏰'}</span>
                         <span>${c.name}</span>
                     </div>
                     <div>
                         <span class="stock-value">${Math.floor(c.capital / 1000)}K MC</span>
-                        <span class="stock-change change-positive">â–² +${Math.floor(Math.random() * 15)}%</span>
+                        <span class="stock-change change-positive">▲ +${Math.floor(Math.random() * 15)}%</span>
                     </div>
                 </div>
             `).join('');
@@ -1404,7 +1386,6 @@
         }
     }
 
-    // ========== ÐžÐ‘ÐÐžÐ’Ð›Ð•ÐÐ˜Ð• Ð¡Ð¢ÐÐ¢Ð˜Ð¡Ð¢Ð˜ÐšÐ˜ ==========
     async function updateStats() {
         try {
             const memes = await apiRequest('/api/memes');
@@ -1421,7 +1402,6 @@
         }
     }
 
-    // ========== ÐœÐžÐ”ÐÐ›ÐšÐ Ð¡ÐžÐ—Ð”ÐÐÐ˜Ð¯ ÐœÐ•ÐœÐ ==========
     function initCreateMemeModal() {
         const modal = document.getElementById('createMemeModal');
         const openBtn = document.getElementById('openCreateMemeModalBtn');
@@ -1431,7 +1411,6 @@
         const iconInput = document.getElementById('memeIconInput');
         const emojiPreview = document.getElementById('emojiPreview');
         
-        // Tabs
         const tabs = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
         
@@ -1446,22 +1425,19 @@
             });
         });
         
-        // Emoji preview
         iconInput.addEventListener('input', () => {
             const icon = iconInput.value.trim();
-            emojiPreview.textContent = icon || 'ðŸš€';
+            emojiPreview.textContent = icon || '🚀';
         });
         
-        // Random emoji on focus
         iconInput.addEventListener('focus', () => {
             if (!iconInput.value.trim()) {
-                const emojis = ['ðŸš€', 'ðŸ¸', 'ðŸ„', 'ðŸ¹', 'âš¡', 'ðŸ’Ž', 'ðŸ”¥', 'ðŸŒˆ', 'ðŸ¦„', 'ðŸ‰', 'ðŸ˜‚', 'â¤ï¸', 'ðŸ‘', 'ðŸŽ‰'];
+                const emojis = ['🚀', '🐸', '🍄', '🐹', '⚡', '💎', '🔥', '🌈', '🦄', '🐉', '😂', '❤️', '👍', '🎉'];
                 iconInput.value = emojis[Math.floor(Math.random() * emojis.length)];
                 emojiPreview.textContent = iconInput.value;
             }
         });
         
-        // Image upload
         const uploadArea = document.getElementById('imageUploadArea');
         const fileInput = document.getElementById('imageFileInput');
         const imagePreview = document.getElementById('imagePreview');
@@ -1489,7 +1465,7 @@
             if (file && file.type.startsWith('image/')) {
                 handleImageUpload(file);
             } else {
-                showToast('ÐŸÐ¾Ð¶Ð°Ð»ÑƒÐ¹ÑÑ‚Ð°, Ð²Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ð¸Ð·Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð¸Ðµ', false);
+                showToast('Пожалуйста, выберите изображение', false);
             }
         });
         
@@ -1500,7 +1476,7 @@
         
         function handleImageUpload(file) {
             if (file.size > 5 * 1024 * 1024) {
-                showToast('Ð¤Ð°Ð¹Ð» ÑÐ»Ð¸ÑˆÐºÐ¾Ð¼ Ð±Ð¾Ð»ÑŒÑˆÐ¾Ð¹ (Ð¼Ð°ÐºÑ. 5MB)', false);
+                showToast('Файл слишком большой (макс. 5MB)', false);
                 return;
             }
             
@@ -1515,11 +1491,10 @@
             reader.readAsDataURL(file);
         }
         
-        // Reset modal on open
         openBtn.addEventListener('click', () => {
             nameInput.value = '';
-            iconInput.value = 'ðŸš€';
-            emojiPreview.textContent = 'ðŸš€';
+            iconInput.value = '🚀';
+            emojiPreview.textContent = '🚀';
             imagePreviewContainer.style.display = 'none';
             uploadArea.style.display = 'block';
             fileInput.value = '';
@@ -1539,12 +1514,12 @@
             const name = nameInput.value.trim();
             
             if (!name) {
-                showToast('Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð¼ÐµÐ¼Ð°', false);
+                showToast('Введите название мема', false);
                 return;
             }
             
             if (name.length < 2) {
-                showToast('ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð´Ð¾Ð»Ð¶Ð½Ð¾ Ð±Ñ‹Ñ‚ÑŒ Ð½Ðµ Ð¼ÐµÐ½ÐµÐµ 2 ÑÐ¸Ð¼Ð²Ð¾Ð»Ð¾Ð²', false);
+                showToast('Название должно быть не менее 2 символов', false);
                 return;
             }
             
@@ -1552,32 +1527,32 @@
             formData.append('name', name);
             
             if (memeType === 'emoji') {
-                const icon = iconInput.value.trim() || 'ðŸš€';
+                const icon = iconInput.value.trim() || '🚀';
                 formData.append('icon', icon);
             } else {
                 if (!selectedImageData) {
-                    showToast('Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ Ð¸Ð·Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð¸Ðµ', false);
+                    showToast('Выберите изображение', false);
                     return;
                 }
-                formData.append('icon', 'ðŸ–¼ï¸');
+                formData.append('icon', '🖼️');
                 const blob = await (await fetch(selectedImageData)).blob();
                 formData.append('image', blob, 'meme.png');
             }
             
             confirmBtn.disabled = true;
-            confirmBtn.textContent = 'Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ...';
+            confirmBtn.textContent = 'Создание...';
             
             try {
-                const res = await fetch('https://meme-exchange-backend.onrender.com/api/memes/create', {
+                const response = await fetch('https://meme-exchange-backend.onrender.com/api/memes/create', {
                     method: 'POST',
                     credentials: 'include',
                     body: formData
                 });
                 
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'ÐžÑˆÐ¸Ð±ÐºÐ° ÑÐ¾Ð·Ð´Ð°Ð½Ð¸Ñ');
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Ошибка создания');
                 
-                showToast(`ðŸŽ‰ ÐœÐµÐ¼ "${name}" ÑÐ¾Ð·Ð´Ð°Ð½!`, true);
+                showToast(`🎉 Мем "${name}" создан!`, true);
                 modal.style.display = 'none';
                 await loadBalance();
                 await loadMemes();
@@ -1585,7 +1560,7 @@
                 showToast(e.message, false);
             } finally {
                 confirmBtn.disabled = false;
-                confirmBtn.textContent = 'Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ';
+                confirmBtn.textContent = 'Создать';
             }
         });
         
@@ -1598,8 +1573,7 @@
         });
     }
 
-    // ========== Ð˜ÐÐ˜Ð¦Ð˜ÐÐ›Ð˜Ð—ÐÐ¦Ð˜Ð¯ ==========
-        async function init() {
+    async function init() {
         if (!await checkAuth()) return;
         
         await loadBalance();
