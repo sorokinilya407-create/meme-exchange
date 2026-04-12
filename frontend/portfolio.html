@@ -878,7 +878,7 @@
 
     async function checkAuth() {
         try {
-            await apiRequest('/api/user/profile');
+            await apiRequest('https://meme-exchange-backend.onrender.com/api/user/profile')
             return true;
         } catch (e) {
             window.location.href = '/login.html';
@@ -899,7 +899,7 @@
 
     async function loadProfile() {
         try {
-            userProfile = await apiRequest('/api/user/profile');
+            userProfile = await apiRequest('https://meme-exchange-backend.onrender.com/api/user/profile')
             
             if (userProfile.clan_id) {
                 const clans = await apiRequest('/api/clans');
@@ -920,7 +920,7 @@
 
     async function loadBalance() {
         try {
-            const data = await apiRequest('/api/user/balance');
+            const data = await apiRequest('https://meme-exchange-backend.onrender.com/api/user/balance')
             userBalance = data.balance;
             document.getElementById('balanceDisplay').innerHTML = `<i class="fas fa-coins"></i> ${userBalance.toLocaleString()} MC`;
             document.getElementById('cashBalance').textContent = `${userBalance.toLocaleString()} MC`;
@@ -932,7 +932,7 @@
 
     async function loadAssets() {
         try {
-            const assets = await apiRequest('/api/portfolio/assets');
+            const assets = await apiRequest('https://meme-exchange-backend.onrender.com/api/portfolio/assets')
             renderAssets(assets);
             return assets;
         } catch (e) {
@@ -1023,7 +1023,7 @@
 
     async function loadHistory() {
         try {
-            const history = await apiRequest('/api/portfolio/history');
+            const history = await apiRequest('https://meme-exchange-backend.onrender.com/api/portfolio/history')
             const container = document.getElementById('historyList');
             
             if (!history.length) {
