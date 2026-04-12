@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MEME XCHANGE — Биржа мемов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0A0A0F;
+            --bg-secondary: #111117;
+            --bg-tertiary: #0D0D12;
+            --accent-green: #00FF88;
+            --accent-purple: #9D4EDD;
+            --accent-red: #FF3366;
+            --accent-yellow: #FFD966;
+            --text-primary: #EDEDED;
+            --text-secondary: #7A7A8C;
+            --border-dark: #23232E;
+            --border-light: #2A2A35;
+            --glass-bg: rgba(17, 17, 23, 0.7);
+            --glass-border: rgba(0, 255, 136, 0.2);
+            --shadow-glow: 0 0 40px rgba(0, 255, 136, 0.15);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --gradient-hero: linear-gradient(135deg, #00FF88 0%, #9D4EDD 50%, #FF3366 100%);
+            --gradient-card: linear-gradient(145deg, #111117 0%, #0D0D12 100%);
+        }
+
+        body {
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 136, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 90% 70%, rgba(157, 78, 221, 0.04) 0%, transparent 40%);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            padding: 0 20px 40px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, transparent 0px, transparent 3px, rgba(0, 255, 136, 0.01) 3px, rgba(0, 255, 136, 0.01) 6px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 20px 0;
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--border-dark);
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            z-index: 100;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            background: var(--gradient-hero);
+            width: 50px;
+            height: 50px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--bg-primary);
+            box-shadow: var(--shadow-glow);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFFFFF, var(--accent-green));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 24px;
+            border-radius: 60px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-card);
+        }
+
+        .balance {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--accent-green);
+            font-size: 1.4rem;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .balance i {
+            color: var(--accent-yellow);
+            margin-right: 8px;
+        }
+
+        .avatar {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-green));
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            font-size: 1.2rem;
+        }
+
+        .avatar:hover {
+            transform: scale(1.1);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Market Stats Bar */
+        .market-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 28px;
+            padding: 16px 24px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 60px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .market-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .market-stat i {
+            color: var(--accent-green);
+        }
+
+        .market-stat strong {
+            color: var(--text-primary);
+            margin-left: 4px;
+        }
+
+        /* Exchange Grid */
+        .exchange-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 28px;
+            margin-bottom: 40px;
+        }
+
+        /* Assets Section */
+        .assets-section {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 32px;
+            padding: 6px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .assets-header {
+            padding: 20px 24px 16px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--border-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assets-header i {
+            color: var(--accent-green);
+        }
+
+        .assets-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .asset-card {
+            background: rgba(13, 13, 18, 0.6);
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid var(--border-dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .asset-card:hover {
+            border-color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.03);
+            transform: translateX(5px);
+        }
+
+        .asset-card.active {
+            border: 2px solid var(--accent-green);
+            background: rgba(0, 255, 136, 0.05);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+
+        .asset-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .asset-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .asset-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid var(--border-dark);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .asset-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .asset-details h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .asset-ticker {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .asset-price-info {
+            text-align: right;
+        }
+
+        .asset-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .asset-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .change-positive {
+            color: var(--accent-green);
+        }
+
+        .change-negative {
+            color: var(--accent-red);
+        }
+
+        .asset-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn-sm {
+            flex: 1;
+            padding: 10px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background: transparent;
+        }
+
+        .btn-buy-sm {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .btn-buy-sm:hover {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            transform: scale(1.02);
+        }
+
+        .btn-sell-sm {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .btn-sell-sm:hover {
+            background: var(--accent-red);
+            color: var(--text-primary);
+            transform: scale(1.02);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            margin: 16px;
+            background: var(--bg-primary);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-title i {
+            color: var(--accent-green);
+        }
+
+        canvas {
+            max-height: 240px;
+            width: 100%;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .panel-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 28px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .panel-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent-green);
+            padding-left: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-header i {
+            color: var(--accent-green);
+        }
+
+        /* Order Book */
+        .book-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 10px 0;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-dark);
+            margin-bottom: 8px;
+        }
+
+        .book-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 8px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(30, 30, 40, 0.5);
+        }
+
+        .book-row:last-child {
+            border-bottom: none;
+        }
+
+        .buy-color {
+            color: var(--accent-green);
+        }
+
+        .sell-color {
+            color: var(--accent-red);
+        }
+
+        .spread-indicator {
+            text-align: center;
+            padding: 10px;
+            color: var(--accent-purple);
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-dark);
+            border-bottom: 1px solid var(--border-dark);
+            margin: 8px 0;
+        }
+
+        /* Trade History */
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(30, 30, 40, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-time {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        /* Trade Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--gradient-card);
+            border: 1px solid var(--accent-green);
+            border-radius: 32px;
+            padding: 32px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: var(--shadow-glow), var(--shadow-card);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .modal-content p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 14px 18px;
+            width: 100%;
+            border-radius: 50px;
+            margin: 12px 0;
+            text-align: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.2);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-confirm {
+            background: var(--accent-green);
+            border: none;
+            color: var(--bg-primary);
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm:hover {
+            background: #00cc66;
+            transform: scale(1.02);
+        }
+
+        .btn-cancel {
+            background: var(--border-light);
+            border: none;
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: #3A3A45;
+        }
+
+        /* Navigation */
+        .quick-nav {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-dark);
+        }
+
+        .quick-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 40px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-nav a:hover {
+            color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            padding: 16px 28px;
+            border-radius: 60px;
+            font-weight: 700;
+            z-index: 9999;
+            animation: slideIn 0.4s ease;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .text-muted {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Scrollbar */
+        .assets-grid::-webkit-scrollbar,
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .assets-grid::-webkit-scrollbar-track,
+        .history-list::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 10px;
+        }
+
+        .assets-grid::-webkit-scrollbar-thumb,
+        .history-list::-webkit-scrollbar-thumb {
+            background: var(--border-dark);
+            border-radius: 10px;
+        }
+
+        .assets-grid::-webkit-scrollbar-thumb:hover,
+        .history-list::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-green);
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .exchange-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0 12px 40px;
+            }
+
+            .logo h1 {
+                font-size: 20px;
+            }
+
+            .market-stats {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            .asset-actions {
+                flex-direction: column;
+            }
+
+            .quick-nav {
+                gap: 16px;
+            }
+
+            .quick-nav a {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">⧉</div>
+            <h1>MEME XCHANGE · БИРЖА</h1>
+        </div>
+        <div class="user-panel">
+            <div class="balance" id="balanceDisplay">
+                <i class="fas fa-coins"></i> -- MC
+            </div>
+            <div class="avatar">
+                <i class="fas fa-user-ninja"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Stats -->
+    <div class="market-stats">
+        <div class="market-stat">
+            <i class="fas fa-chart-line"></i>
+            <span>Объём 24ч: <strong id="totalVolume">0 MC</strong></span>
+        </div>
+        <div class="market-stat">
+            <i class="fas fa-coins"></i>
+            <span>Мемов: <strong id="totalMemes">0</strong></span>
+        </div>
+        <div class="market-stat">
+            <i class="fas fa-arrow-trend-up"></i>
+            <span>Лучший рост: <strong id="topGainer">—</strong></span>
+        </div>
+    </div>
+
+    <!-- Exchange Grid -->
+    <div class="exchange-grid">
+        <div class="assets-section">
+            <div class="assets-header">
+                <i class="fas fa-chart-line"></i> Торгуемые мемы
+            </div>
+            <div class="assets-grid" id="assetsList">
+                <div class="text-muted" style="padding: 30px; text-align: center;">Загрузка...</div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-chart-simple"></i>
+                    <span id="chartAssetName">PEPE</span> — динамика цены
+                </div>
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <!-- Order Book -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <i class="fas fa-list"></i> Биржевой стакан
+                </div>
+                <div class="book-header">
+                    <span>Цена (MC)</span>
+                    <span>Кол-во</span>
+                    <span>Сумма</span>
+                </div>
+                <div id="orderBookBids"></div>
+                <div class="spread-indicator">
+                    <i class="fas fa-arrows-up-down"></i> СПРЕД <span id="spreadValue">0.00</span> MC
+                </div>
+                <div id="orderBookAsks"></div>
+            </div>
+
+            <!-- Trade History -->
+            <div class="panel-card">
+                <div class="panel-header">
+                    <i class="fas fa-clock"></i> История сделок
+                </div>
+                <div class="history-list" id="tradeHistoryList">
+                    <div class="text-muted" style="padding: 20px; text-align: center;">Загрузка...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="quick-nav">
+        <a href="index.html"><i class="fas fa-home"></i> Главная</a>
+        <a href="clans.html"><i class="fas fa-users"></i> Кланы</a>
+        <a href="leaders.html"><i class="fas fa-trophy"></i> Топ</a>
+        <a href="portfolio.html"><i class="fas fa-wallet"></i> Портфель</a>
+        <a href="deposit.html"><i class="fas fa-gem"></i> Пополнение</a>
+    </div>
+</div>
+
+<!-- Trade Modal -->
+<div id="tradeModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Купить PEPE</h3>
+        <p>Текущая цена: <strong id="modalPrice">0</strong> MC</p>
+        <input type="number" id="modalAmount" value="1" step="0.1" min="0.1" placeholder="Количество">
+        <p>Итого: <strong id="modalTotal">0</strong> MC</p>
+        <div class="modal-buttons">
+            <button id="modalConfirmBtn" class="btn-confirm">Подтвердить</button>
+            <button id="modalCancelBtn" class="btn-cancel">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== Utility Functions ==========
+    function showToast(msg, success = true) {
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.style.background = success ? '#00FF88' : '#FF3366';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    async function apiRequest(url, method = 'GET', body = null) {
+        const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(url, opts);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Ошибка');
+        return data;
+    }
+
+    async function checkAuth() {
+        try {
+            await apiRequest('/api/user/profile');
+            return true;
+        } catch (e) {
+            window.location.href = '/login.html';
+            return false;
+        }
+    }
+
+    async function loadBalance() {
+        try {
+            const data = await apiRequest('/api/user/balance');
+            document.getElementById('balanceDisplay').innerHTML = `<i class="fas fa-coins"></i> ${data.balance.toLocaleString()} MC`;
+            return data.balance;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    // ========== ФУНКЦИЯ ОТОБРАЖЕНИЯ КАРТИНКИ ==========
+   function getMemeDisplay(meme) {
+    if (meme.image_url) {
+        return `<img src="${meme.image_url}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 12px; display: block;">`;
+    }
+    return meme.icon || '📦';
+}
+
+    // ========== Global Variables ==========
+    let currentChart = null;
+    let selectedAsset = null;
+    let currentModalType = null;
+    let currentModalAsset = null;
+    let memes = [];
+
+    async function loadMemes() {
+        memes = await apiRequest('/api/memes');
+        renderAssets();
+        updateMarketStats();
+    }
+
+    function updateMarketStats() {
+    const totalVolume = memes.reduce((sum, m) => sum + (Number(m.volume_24h) || 0), 0);
+    document.getElementById('totalVolume').textContent = Math.floor(totalVolume).toLocaleString() + ' MC';
+    document.getElementById('totalMemes').textContent = memes.length;
+    
+    if (memes.length) {
+        const topGainer = memes.reduce((best, m) => {
+            return (Number(m.change_24h) || 0) > (Number(best.change_24h) || 0) ? m : best;
+        }, memes[0]);
+        
+        // ИСПРАВЛЕНО: вставляем только текст, без картинки
+        document.getElementById('topGainer').textContent = `${topGainer.name} (+${Number(topGainer.change_24h).toFixed(1)}%)`;
+    }
+}
+
+    function renderAssets() {
+        const container = document.getElementById('assetsList');
+        
+        if (!memes.length) {
+            container.innerHTML = '<div class="text-muted" style="padding: 30px; text-align: center;">Нет мемов. Создайте первый на главной!</div>';
+            return;
+        }
+
+        container.innerHTML = memes.map(m => {
+            const price = Number(m.price);
+            const change = Number(m.change_24h);
+            const activeClass = selectedAsset?.id === m.id ? 'active' : '';
+            
+            return `
+                <div class="asset-card ${activeClass}" data-id="${m.id}">
+                    <div class="asset-row">
+                        <div class="asset-info">
+                            <div class="asset-icon">${getMemeDisplay(m)}</div>
+                            <div class="asset-details">
+                                <h3>${m.name}</h3>
+                                <span class="asset-ticker">${m.name}</span>
+                            </div>
+                        </div>
+                        <div class="asset-price-info">
+                            <div class="asset-price">${isNaN(price) ? 0 : price.toFixed(2)} MC</div>
+                            <div class="asset-change ${change >= 0 ? 'change-positive' : 'change-negative'}">
+                                ${change >= 0 ? '▲' : '▼'} ${isNaN(change) ? '0.0' : Math.abs(change).toFixed(1)}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="asset-actions">
+                        <button class="btn-sm btn-buy-sm" data-id="${m.id}">
+                            <i class="fas fa-arrow-up"></i> Купить
+                        </button>
+                        <button class="btn-sm btn-sell-sm" data-id="${m.id}">
+                            <i class="fas fa-arrow-down"></i> Продать
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.querySelectorAll('.btn-buy-sm').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(btn.dataset.id);
+                openModal('buy', memes.find(m => m.id === id));
+            });
+        });
+
+        document.querySelectorAll('.btn-sell-sm').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(btn.dataset.id);
+                openModal('sell', memes.find(m => m.id === id));
+            });
+        });
+
+        document.querySelectorAll('.asset-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                const id = parseInt(card.dataset.id);
+                selectedAsset = memes.find(m => m.id === id);
+                renderAssets();
+                updateChart();
+                updateOrderBook();
+            });
+        });
+
+        if (!selectedAsset && memes.length) {
+            selectedAsset = memes[0];
+        }
+        
+        if (selectedAsset) {
+            updateChart();
+            updateOrderBook();
+        }
+    }
+
+    function updateChart() {
+        if (!selectedAsset) return;
+        
+        document.getElementById('chartAssetName').textContent = selectedAsset.name;
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        
+        if (currentChart) currentChart.destroy();
+        
+        const price = Number(selectedAsset.price);
+        const fake = [price * 0.88, price * 0.92, price * 0.96, price * 1.02, price * 1.05, price * 1.01, price];
+        
+        currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['6д', '5д', '4д', '3д', '2д', 'Вчера', 'Сегодня'],
+                datasets: [{
+                    label: `${selectedAsset.name} (MC)`,
+                    data: fake,
+                    borderColor: '#00FF88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.05)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#9D4EDD',
+                    pointBorderColor: '#00FF88',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { labels: { color: '#ccc' } },
+                    tooltip: { backgroundColor: '#111117', titleColor: '#00FF88', bodyColor: '#EDEDED', borderColor: '#00FF88', borderWidth: 1 }
+                },
+                scales: {
+                    y: { grid: { color: '#23232E' }, ticks: { color: '#aaa' } },
+                    x: { grid: { display: false }, ticks: { color: '#aaa' } }
+                }
+            }
+        });
+    }
+
+    function updateOrderBook() {
+        if (!selectedAsset) return;
+        const base = Number(selectedAsset.price);
+        
+        const bidsHtml = [1,2,3].map(i => {
+            const price = (base - 0.2 * i).toFixed(2);
+            const amount = Math.floor(100 + Math.random() * 200);
+            return `<div class="book-row"><span class="buy-color">${price}</span><span>${amount}</span><span>${(price*amount).toFixed(0)}</span></div>`;
+        }).join('');
+        
+        const asksHtml = [1,2,3].map(i => {
+            const price = (base + 0.2 * i).toFixed(2);
+            const amount = Math.floor(80 + Math.random() * 150);
+            return `<div class="book-row"><span class="sell-color">${price}</span><span>${amount}</span><span>${(price*amount).toFixed(0)}</span></div>`;
+        }).join('');
+        
+        document.getElementById('orderBookBids').innerHTML = bidsHtml;
+        document.getElementById('orderBookAsks').innerHTML = asksHtml;
+        document.getElementById('spreadValue').textContent = (base * 0.004).toFixed(2);
+    }
+
+    async function loadHistory() {
+        try {
+            const history = await apiRequest('/api/portfolio/history');
+            const container = document.getElementById('tradeHistoryList');
+            
+            if (!history.length) {
+                container.innerHTML = '<div class="text-muted" style="padding:20px;text-align:center;">Нет сделок</div>';
+                return;
+            }
+            
+            container.innerHTML = history.slice(0,10).map(tx => {
+                const time = new Date(tx.date).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+                const typeColor = tx.type === 'buy' ? '#00FF88' : '#FF3366';
+                return `<div class="history-item">
+                    <span style="color:${typeColor};font-weight:700;">${tx.type==='buy'?'↑':'↓'} ${tx.type==='buy'?'Покупка':'Продажа'}</span>
+                    <span>${tx.asset}</span>
+                    <span>${tx.quantity} шт</span>
+                    <span style="font-family:'JetBrains Mono',monospace;">${Number(tx.price).toFixed(2)} MC</span>
+                    <span class="history-time">${time}</span>
+                </div>`;
+            }).join('');
+        } catch (e) {}
+    }
+
+    function openModal(type, asset) {
+        currentModalType = type;
+        currentModalAsset = asset;
+        document.getElementById('modalTitle').innerHTML = type==='buy' 
+            ? `<i class="fas fa-arrow-up" style="color:#00FF88;"></i> Купить ${asset.name}`
+            : `<i class="fas fa-arrow-down" style="color:#FF3366;"></i> Продать ${asset.name}`;
+        document.getElementById('modalPrice').textContent = Number(asset.price).toFixed(2);
+        document.getElementById('modalAmount').value = 1;
+        updateModalTotal();
+        document.getElementById('tradeModal').style.display = 'flex';
+    }
+
+    function updateModalTotal() {
+        const amount = parseFloat(document.getElementById('modalAmount').value) || 0;
+        const price = Number(currentModalAsset?.price) || 0;
+        document.getElementById('modalTotal').textContent = (amount * price).toFixed(2);
+    }
+
+    function closeModal() {
+        document.getElementById('tradeModal').style.display = 'none';
+    }
+
+    async function confirmModal() {
+        if (!currentModalAsset) return;
+        const amount = parseFloat(document.getElementById('modalAmount').value);
+        if (isNaN(amount) || amount <= 0) { showToast('Введите корректное количество', false); return; }
+        try {
+            if (currentModalType === 'buy') await apiRequest('/api/trades/buy', 'POST', { memeId: currentModalAsset.id, quantity: amount });
+            else await apiRequest('/api/trades/sell', 'POST', { memeId: currentModalAsset.id, quantity: amount });
+            showToast(`✅ ${currentModalType==='buy'?'Куплено':'Продано'} ${amount} ${currentModalAsset.name}`, true);
+            await loadBalance(); await loadMemes(); await loadHistory(); closeModal();
+        } catch (e) { showToast(e.message, false); }
+    }
+
+    async function init() {
+        if (!await checkAuth()) return;
+        await loadBalance(); await loadMemes(); await loadHistory();
+        document.getElementById('modalConfirmBtn').onclick = confirmModal;
+        document.getElementById('modalCancelBtn').onclick = closeModal;
+        document.getElementById('modalAmount').oninput = updateModalTotal;
+        window.onclick = (e) => { if (e.target === document.getElementById('tradeModal')) closeModal(); };
+        setInterval(async () => { await loadMemes(); await loadBalance(); }, 15000);
+        const socket = io();
+        socket.on('priceUpdate', (prices) => {
+            prices.forEach(p => { const meme = memes.find(m => m.id === p.id); if (meme) { meme.price = p.price; meme.change_24h = p.change_24h; } });
+            renderAssets();
+            if (selectedAsset) { const updated = memes.find(m => m.id === selectedAsset.id); if (updated) selectedAsset = updated; updateChart(); updateOrderBook(); }
+        });
+    }
+
+    init();
+</script>
+<script src="/socket.io/socket.io.js"></script>
+</body>
+</html>
