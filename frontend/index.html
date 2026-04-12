@@ -1555,7 +1555,7 @@
             confirmBtn.textContent = 'Создание...';
             
             try {
-                const res = await fetch('/api/memes/create', {
+                const res = await fetch('https://meme-exchange-backend.onrender.com/api/memes/create', {
                     method: 'POST',
                     credentials: 'include',
                     body: formData
