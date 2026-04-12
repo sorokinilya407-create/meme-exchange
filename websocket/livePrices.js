@@ -1,7 +1,6 @@
 const db = require('../db/pool');
 
 module.exports = (io) => {
-  // Отправка цен при подключении
   io.on('connection', async (socket) => {
     console.log('🔌 Client connected to WebSocket');
     
@@ -19,7 +18,6 @@ module.exports = (io) => {
     });
   });
   
-  // Периодическое обновление цен
   setInterval(async () => {
     try {
       const result = await db.query(
@@ -27,7 +25,7 @@ module.exports = (io) => {
       );
       io.emit('priceUpdate', result.rows);
     } catch (err) {
-      console.error('WebSocket price update error:', err);
+      console.error('WebSocket price update error:', err.message);
     }
-  }, 5000); // Обновление каждые 5 секунд
+  }, 5000);
 };
