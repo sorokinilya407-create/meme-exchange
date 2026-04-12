@@ -1165,7 +1165,7 @@
 
     async function loadBalance() {
         try {
-            const data = await apiRequest('/api/user/balance');
+            const data = await apiRequest('https://meme-exchange-backend.onrender.com/api/user/balance')
             document.getElementById('balanceDisplay').innerHTML = `<i class="fas fa-coins"></i> ${data.balance.toLocaleString()} MC`;
             return data.balance;
         } catch (e) {
@@ -1175,7 +1175,7 @@
 
     async function checkAuth() {
         try {
-            await apiRequest('/api/user/profile');
+            await apiRequest('https://meme-exchange-backend.onrender.com/api/user/profile')
             return true;
         } catch (e) {
             window.location.href = '/login.html';
@@ -1198,7 +1198,7 @@
     // ========== ЗАГРУЗКА МЕМОВ ==========
     async function loadMemes() {
         try {
-            const memes = await apiRequest('/api/memes');
+            const memes = await apiRequest('https://meme-exchange-backend.onrender.com/api/memes')
             const container = document.getElementById('memesContainer');
             
             if (!memes.length) {
@@ -1244,7 +1244,7 @@
                     const memeId = btn.dataset.id;
                     const price = parseFloat(btn.dataset.price);
                     try {
-                        await apiRequest('/api/trades/buy', 'POST', { memeId, quantity: 1 });
+                        await apiRequest('https://meme-exchange-backend.onrender.com/api/trades/buy', 'POST', ...)
                         showToast(`✅ Куплено за ${price.toFixed(0)} MC`, true);
                         loadBalance();
                         loadMemes();
@@ -1265,7 +1265,7 @@
     // ========== ЗАГРУЗКА ТОП ТРЕЙДЕРОВ ==========
     async function loadTopTraders() {
         try {
-            const data = await apiRequest('/api/leaders/capital');
+            const data = await apiRequest('https://meme-exchange-backend.onrender.com/api/leaders/capital')
             const container = document.getElementById('topTradersList');
             
             if (!data.length) {
@@ -1309,7 +1309,7 @@
     // ========== ЗАГРУЗКА КЛАНОВОЙ ВОЙНЫ ==========
     async function loadClanWar() {
         try {
-            const war = await apiRequest('/api/clans/war');
+            const war = await apiRequest('https://meme-exchange-backend.onrender.com/api/clans/war');
             const container = document.getElementById('clanWarBlock');
             
             if (war.active) {
@@ -1366,7 +1366,7 @@
     // ========== ЗАГРУЗКА АКЦИЙ КЛАНОВ ==========
     async function loadClanStocks() {
         try {
-            const clans = await apiRequest('/api/clans');
+            const clans = await apiRequest('https://meme-exchange-backend.onrender.com/api/clans')
             const container = document.getElementById('clanStocks');
             
             if (!clans.length) {
@@ -1555,7 +1555,7 @@
             confirmBtn.textContent = 'Создание...';
             
             try {
-                const res = await fetch('https://meme-exchange-backend.onrender.com/api/memes/create', {
+                const res = fetch('https://meme-exchange-backend.onrender.com/api/memes/create', {
                     method: 'POST',
                     credentials: 'include',
                     body: formData
