@@ -1599,7 +1599,7 @@
     }
 
     // ========== Ð˜ÐÐ˜Ð¦Ð˜ÐÐ›Ð˜Ð—ÐÐ¦Ð˜Ð¯ ==========
-    async function init() {
+        async function init() {
         if (!await checkAuth()) return;
         
         await loadBalance();
@@ -1612,14 +1612,14 @@
         initCreateMemeModal();
         
         document.getElementById('goToTradeBtn').onclick = () => window.location.href = 'birga.html';
-        document.getElementById('avatarBtn').onclick = () => showToast(`Ð’Ð°Ñˆ Ð¿Ñ€Ð¾Ñ„Ð¸Ð»ÑŒ`, true);
+        document.getElementById('avatarBtn').onclick = () => showToast(`Ваш профиль`, true);
         
         setInterval(async () => {
             await loadMemes();
             await loadTopTraders();
             await updateStats();
         }, 30000);
-    
+    }
 
     init();
 </script>
