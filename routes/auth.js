@@ -4,15 +4,11 @@ const jwt = require('jsonwebtoken');
 const db = require('../db/pool');
 const router = express.Router();
 
-// ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ RENDER (SMTP блокируется)
-// const { sendVerificationCode } = require('../services/email');
-
 // Регистрация (без подтверждения email)
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     
     try {
-        // Проверяем, нет ли уже такого пользователя
         const existing = await db.query(
             'SELECT id FROM users WHERE email = $1 OR username = $2',
             [email, username]
@@ -22,28 +18,18 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Пользователь уже существует' });
         }
         
-        // Хешируем пароль
         const hashed = await bcrypt.hash(password, 12);
         
-        // Создаём пользователя сразу активным
         const result = await db.query(
-            `INSERT INTO users (username, email, password_hash, balance, is_verified, created_at) 
-             VALUES ($1, $2, $3, 10000, true, NOW()) RETURNING id`,
+            `INSERT INTO users (username, email, password_hash, balance, is_verified) 
+             VALUES ($1, $2, $3, 10000, true) RETURNING id`,
             [username, email, hashed]
         );
         
-        const userId = result.rows[0].id;
-        
-        // Выдаём токен и сразу логиним
-        const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign({ userId: result.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'strict' });
         
-        res.json({ 
-            success: true, 
-            username, 
-            balance: 10000,
-            message: 'Регистрация успешна!'
-        });
+        res.json({ success: true, username, balance: 10000 });
         
     } catch (err) {
         console.error('Register error:', err);
@@ -51,7 +37,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Вход (без проверки is_verified)
+// Вход
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     
@@ -65,21 +51,15 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Неверный email или пароль' });
         }
         
-        // Проверяем пароль
         const valid = await bcrypt.compare(password, user.rows[0].password_hash);
         if (!valid) {
             return res.status(401).json({ error: 'Неверный email или пароль' });
         }
         
-        // Выдаём токен
         const token = jwt.sign({ userId: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'strict' });
         
-        res.json({ 
-            success: true, 
-            username: user.rows[0].username, 
-            balance: user.rows[0].balance 
-        });
+        res.json({ success: true, username: user.rows[0].username, balance: user.rows[0].balance });
         
     } catch (err) {
         console.error('Login error:', err);
@@ -87,7 +67,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Выход
 router.post('/logout', (req, res) => {
     res.clearCookie('token');
     res.json({ success: true });
