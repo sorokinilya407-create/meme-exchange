@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль | MEME XCHANGE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:#0A0A0F; font-family:'Inter',sans-serif; color:#EDEDED; padding:20px; min-height:100vh; }
+        .container { max-width:800px; margin:0 auto; }
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; padding-bottom:15px; border-bottom:1px solid #23232E; }
+        .logo { display:flex; align-items:center; gap:10px; }
+        .logo-icon { background:linear-gradient(135deg,#00FF88,#9D4EDD); width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; color:#0A0A0F; }
+        .balance { font-family:'JetBrains Mono',monospace; color:#00FF88; font-size:1.2rem; }
+        .profile-card { background:#111117; border-radius:28px; padding:30px; border:1px solid #23232E; }
+        .avatar-section { display:flex; align-items:center; gap:24px; margin-bottom:30px; }
+        .avatar-img { width:100px; height:100px; border-radius:50%; background:#1A1A24; border:2px solid #00FF88; display:flex; align-items:center; justify-content:center; font-size:40px; overflow:hidden; }
+        .avatar-img img { width:100%; height:100%; object-fit:cover; }
+        .avatar-upload { cursor:pointer; background:#00FF8822; border:1px solid #00FF88; color:#00FF88; padding:8px 16px; border-radius:20px; font-size:14px; }
+        .info-row { display:flex; justify-content:space-between; padding:14px 0; border-bottom:1px solid #23232E; }
+        .info-label { color:#7A7A8C; }
+        .info-value { font-weight:600; }
+        textarea { width:100%; background:#0A0A0F; border:1px solid #2A2A35; color:white; padding:12px; border-radius:16px; margin-top:8px; }
+        .btn-save { background:#00FF88; color:#0A0A0F; border:none; padding:12px 24px; border-radius:40px; font-weight:700; cursor:pointer; margin-top:20px; }
+        .toast { position:fixed; bottom:20px; right:20px; background:#00FF88; color:#0A0A0F; padding:12px 20px; border-radius:40px; z-index:1000; }
+        .back-link { color:#00FF88; text-decoration:none; margin-top:20px; display:inline-block; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo"><div class="logo-icon">👤</div><h1>Мой профиль</h1></div>
+        <div class="balance" id="balanceDisplay">-- MC</div>
+    </div>
+    <div class="profile-card">
+        <div class="avatar-section">
+            <div class="avatar-img" id="avatarContainer">🚀</div>
+            <div>
+                <label class="avatar-upload" for="avatarInput"><i class="fas fa-camera"></i> Сменить аватар</label>
+                <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+                <p style="color:#7A7A8C; margin-top:8px;">JPG, PNG до 2MB</p>
+            </div>
+        </div>
+        <div class="info-row"><span class="info-label">Имя пользователя</span><span class="info-value" id="profileUsername">—</span></div>
+        <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="profileEmail">—</span></div>
+        <div class="info-row"><span class="info-label">Баланс</span><span class="info-value" id="profileBalance">0 MC</span></div>
+        <div class="info-row"><span class="info-label">Уровень</span><span class="info-value" id="profileLevel">1</span></div>
+        <div class="info-row"><span class="info-label">Сделок</span><span class="info-value" id="profileTrades">0</span></div>
+        <div class="info-row"><span class="info-label">Куплено / Продано</span><span class="info-value"><span id="bought">0</span> / <span id="sold">0</span> MC</span></div>
+        <div style="margin-top:20px;">
+            <label style="color:#7A7A8C;">О себе</label>
+            <textarea id="bioInput" placeholder="Расскажи о себе..." maxlength="200"></textarea>
+        </div>
+        <button class="btn-save" id="saveProfileBtn">Сохранить изменения</button>
+    </div>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> На главную</a>
+</div>
+<script>
+    const API_BASE = 'https://meme-exchange-backend.onrender.com';
+    function showToast(msg, s=true){ const t=document.createElement('div'); t.className='toast'; t.style.background=s?'#00FF88':'#FF3366'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+
+    async function loadProfile() {
+        const res = await fetch(`${API_BASE}/api/profile`, { credentials:'include' });
+        if(!res.ok){ window.location.href='/login.html'; return; }
+        const data = await res.json();
+        document.getElementById('profileUsername').textContent = data.username;
+        document.getElementById('profileEmail').textContent = data.email;
+        document.getElementById('profileBalance').textContent = Number(data.balance).toLocaleString() + ' MC';
+        document.getElementById('profileLevel').textContent = data.level || 1;
+        document.getElementById('profileTrades').textContent = data.trades_count || 0;
+        document.getElementById('bought').textContent = Math.floor(data.total_bought || 0).toLocaleString();
+        document.getElementById('sold').textContent = Math.floor(data.total_sold || 0).toLocaleString();
+        document.getElementById('bioInput').value = data.bio || '';
+        if(data.avatar_url){
+            document.getElementById('avatarContainer').innerHTML = `<img src="${data.avatar_url}" style="width:100%;height:100%;object-fit:cover;">`;
+        }
+        document.getElementById('balanceDisplay').textContent = Number(data.balance).toLocaleString() + ' MC';
+    }
+
+    document.getElementById('avatarInput').addEventListener('change', async e => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const formData = new FormData();
+        formData.append('avatar', file);
+        const res = await fetch(`${API_BASE}/api/profile/update`, { method:'POST', credentials:'include', body:formData });
+        const data = await res.json();
+        if(res.ok){ showToast('Аватар обновлён!'); loadProfile(); }
+        else showToast(data.error, false);
+    });
+
+    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+        const bio = document.getElementById('bioInput').value;
+        const res = await fetch(`${API_BASE}/api/profile/update`, {
+            method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+            body:JSON.stringify({bio})
+        });
+        const data = await res.json();
+        showToast(res.ok ? 'Профиль обновлён' : data.error, res.ok);
+    });
+
+    loadProfile();
+</script>
+</body>
+</html>
