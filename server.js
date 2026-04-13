@@ -41,7 +41,8 @@ app.use('/api/', limiter);
 */
 
 // ========== Статика (фронтенд) ==========
-app.use(express.static(path.join(__dirname, '../frontend')));
+
+// app.use(express.static(path.join(__dirname, '../frontend')));
 
 // ========== Раздача загруженных изображений ==========
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
