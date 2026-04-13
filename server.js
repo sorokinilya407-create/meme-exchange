@@ -18,7 +18,7 @@ app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000', creden
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
-// Статика
+// Статика для загруженных изображений
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API маршруты
@@ -30,9 +30,21 @@ app.use('/api/clans', require('./routes/clans'));
 app.use('/api/leaders', require('./routes/leaders'));
 app.use('/api/portfolio', require('./routes/portfolio'));
 app.use('/api/quests', require('./routes/quests'));
-app.use('/api/profile', require('./routes/profile')); // новый роут
+app.use('/api/profile', require('./routes/profile'));
 
+// Отдача фронтенда (исправленный путь)
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// 404 для API
+app.use('/api/*', (req, res) => res.status(404).json({ error: 'API endpoint not found' }));
+
+// Все остальные запросы — на index.html (SPA)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
 
 // WebSocket
 require('./websocket/livePrices')(io);
