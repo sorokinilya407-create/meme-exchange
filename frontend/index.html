@@ -1572,6 +1572,15 @@
             if (e.key === 'Enter') confirmBtn.click();
         });
     }
+    async function checkAuth() {
+    try {
+        await apiRequest('/api/user/profile');
+        return true;
+    } catch (e) {
+        window.location.href = '/login.html';
+        return false;
+    }
+}
 
     async function init() {
        // if (!await checkAuth()) return;
