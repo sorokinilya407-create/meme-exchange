@@ -20,6 +20,7 @@
         .hidden { display: none; }
         .toast { position: fixed; bottom: 20px; right: 20px; background: #00FF88; color: #0A0A0F; padding: 12px 20px; border-radius: 40px; font-weight: 600; z-index: 1000; animation: slideIn 0.3s ease; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .resend-link { color: #00FF88; cursor: pointer; font-size: 0.9rem; margin-top: 8px; text-align: right; }
     </style>
 </head>
 <body>
@@ -40,99 +41,97 @@
             <input type="password" id="regPassword" placeholder="Пароль" required>
             <button type="submit">Зарегистрироваться</button>
         </form>
+        <!-- Модалка подтверждения -->
+        <div id="verifyModal" style="display:none; margin-top:20px; padding:16px; background:#1A1A24; border-radius:20px;">
+            <p style="margin-bottom:12px;">Введите код, отправленный на <span id="verifyEmailDisplay"></span></p>
+            <input type="text" id="verificationCode" placeholder="Код" maxlength="6" style="width:100%; padding:12px; background:#0A0A0F; border:1px solid #2A2A35; color:white; border-radius:40px; text-align:center; font-size:20px; letter-spacing:8px;">
+            <button id="verifyBtn" style="width:100%; margin-top:12px; padding:12px; background:#00FF88; border:none; border-radius:40px; font-weight:700;">Подтвердить</button>
+            <div class="resend-link" id="resendCodeBtn">Отправить код повторно</div>
+        </div>
     </div>
 </div>
 <script>
-    function showToast(msg, success = true) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.style.background = success ? '#00FF88' : '#FF3366';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+    const API_BASE = 'https://meme-exchange-backend.onrender.com';
+    let pendingEmail = '';
+
+    function showToast(msg, success=true) {
+        const t = document.createElement('div'); t.className='toast'; t.style.background=success?'#00FF88':'#FF3366'; t.textContent=msg;
+        document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
     }
 
     const tabs = document.querySelectorAll('.auth-tab');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
+    const verifyModal = document.getElementById('verifyModal');
+    let registeredEmail = '';
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            if (tab.dataset.tab === 'login') {
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-            } else {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-            }
-        });
-    });
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+        tabs.forEach(t=>t.classList.remove('active')); tab.classList.add('active');
+        if(tab.dataset.tab==='login'){ loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); }
+        else { loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); }
+        verifyModal.style.display='none';
+    }));
 
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm.addEventListener('submit', async e => {
         e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        const email = document.getElementById('email').value, password = document.getElementById('password').value;
         try {
-            const res = await fetch('https://meme-exchange-backend.onrender.com/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ email, password })
+            const res = await fetch(`${API_BASE}/api/auth/login`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+                body:JSON.stringify({email,password})
             });
             const data = await res.json();
-            if (res.ok) {
-                showToast('Успешный вход!', true);
-                window.location.href = '/index.html';
-            } else {
-                showToast(data.error, false);
-            }
-        } catch(err) {
-            showToast('Ошибка соединения', false);
-        }
+            if(res.ok){ showToast('Успешный вход!',true); window.location.href='/index.html'; }
+            else showToast(data.error,false);
+        } catch(err){ showToast('Ошибка соединения',false); }
     });
 
-    registerForm.addEventListener('submit', async (e) => {
+    registerForm.addEventListener('submit', async e => {
         e.preventDefault();
         const username = document.getElementById('regUsername').value;
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
         try {
-            const res = await fetch('https://meme-exchange-backend.onrender.com/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ username, email, password })
+            const res = await fetch(`${API_BASE}/api/auth/register`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+                body:JSON.stringify({username,email,password})
             });
             const data = await res.json();
-            if (res.ok) {
-                showToast('Регистрация успешна!', true);
-                window.location.href = '/index.html';
-            } else {
-                showToast(data.error, false);
-            }
-        } catch(err) {
-            showToast('Ошибка соединения', false);
-        }
+            if(res.ok){
+                registeredEmail = email;
+                document.getElementById('verifyEmailDisplay').textContent = email;
+                registerForm.classList.add('hidden');
+                verifyModal.style.display='block';
+                showToast('Код отправлен на email',true);
+            } else showToast(data.error,false);
+        } catch(err){ showToast('Ошибка соединения',false); }
     });
-    // Универсальная функция получения иконки мема (эмодзи или картинка)
-function getMemeDisplay(meme) {
-    // Если есть image_url с сервера — используем его
-    if (meme.image_url) {
-        return `<img src="${meme.image_url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
-    }
-    // Иначе проверяем localStorage (для старых мемов)
-    const savedImage = localStorage.getItem(`meme_img_${meme.name}`);
-    if (savedImage) {
-        return `<img src="${savedImage}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
-    }
-    // Иначе показываем эмодзи
-    return meme.icon || '📦';
-}
+
+    document.getElementById('verifyBtn').addEventListener('click', async () => {
+        const code = document.getElementById('verificationCode').value;
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/verify`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+                body:JSON.stringify({email:registeredEmail, code})
+            });
+            const data = await res.json();
+            if(res.ok){ showToast('Аккаунт подтверждён!',true); window.location.href='/index.html'; }
+            else showToast(data.error,false);
+        } catch(err){ showToast('Ошибка соединения',false); }
+    });
+
+    document.getElementById('resendCodeBtn').addEventListener('click', async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/resend-code`, {
+                method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+                body:JSON.stringify({email:registeredEmail})
+            });
+            const data = await res.json();
+            showToast(data.message || 'Код отправлен', res.ok);
+        } catch(err){ showToast('Ошибка соединения',false); }
+    });
 </script>
 </body>
 </html>
-
 
 
