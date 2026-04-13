@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход / Регистрация | MEME XCHANGE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #0A0A0F; font-family: 'Inter', sans-serif; color: #EDEDED; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .auth-container { max-width: 500px; width: 100%; }
+        .auth-card { background: #111117; border-radius: 32px; padding: 32px; border: 1px solid #23232E; }
+        .auth-tabs { display: flex; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid #23232E; }
+        .auth-tab { padding: 12px 0; cursor: pointer; color: #aaa; font-weight: 600; }
+        .auth-tab.active { color: #00FF88; border-bottom: 2px solid #00FF88; }
+        .auth-form { display: flex; flex-direction: column; gap: 16px; }
+        .auth-form input { background: #0A0A0F; border: 1px solid #2A2A35; padding: 14px 18px; border-radius: 40px; color: white; font-size: 1rem; }
+        .auth-form button { background: #00FF88; border: none; padding: 14px; border-radius: 40px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+        .hidden { display: none; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #00FF88; color: #0A0A0F; padding: 12px 20px; border-radius: 40px; font-weight: 600; z-index: 1000; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-tabs">
+            <div class="auth-tab active" data-tab="login">Вход</div>
+            <div class="auth-tab" data-tab="register">Регистрация</div>
+        </div>
+        <form id="loginForm" class="auth-form">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Войти</button>
+        </form>
+        <form id="registerForm" class="auth-form hidden">
+            <input type="text" id="regUsername" placeholder="Имя пользователя" required>
+            <input type="email" id="regEmail" placeholder="Email" required>
+            <input type="password" id="regPassword" placeholder="Пароль" required>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
+<script>
+    function showToast(msg, success = true) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.style.background = success ? '#00FF88' : '#FF3366';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    const tabs = document.querySelectorAll('.auth-tab');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            if (tab.dataset.tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            }
+        });
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        try {
+            const res = await fetch('https://meme-exchange-backend.onrender.com/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showToast('Успешный вход!', true);
+                window.location.href = '/index.html';
+            } else {
+                showToast(data.error, false);
+            }
+        } catch(err) {
+            showToast('Ошибка соединения', false);
+        }
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('regUsername').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        try {
+            const res = await fetch('https://meme-exchange-backend.onrender.com/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ username, email, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showToast('Регистрация успешна!', true);
+                window.location.href = '/index.html';
+            } else {
+                showToast(data.error, false);
+            }
+        } catch(err) {
+            showToast('Ошибка соединения', false);
+        }
+    });
+    // Универсальная функция получения иконки мема (эмодзи или картинка)
+function getMemeDisplay(meme) {
+    // Если есть image_url с сервера — используем его
+    if (meme.image_url) {
+        return `<img src="${meme.image_url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
+    }
+    // Иначе проверяем localStorage (для старых мемов)
+    const savedImage = localStorage.getItem(`meme_img_${meme.name}`);
+    if (savedImage) {
+        return `<img src="${savedImage}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
+    }
+    // Иначе показываем эмодзи
+    return meme.icon || '📦';
+}
+</script>
+</body>
+</html>
+
+
+
