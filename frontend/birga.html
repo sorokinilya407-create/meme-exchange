@@ -1114,7 +1114,7 @@ async function loadBalance() {
         document.getElementById('modalAmount').oninput = updateModalTotal;
         window.onclick = (e) => { if (e.target === document.getElementById('tradeModal')) closeModal(); };
         setInterval(async () => { await loadMemes(); await loadBalance(); }, 15000);
-        const socket = io();
+        const socket = io('https://meme-exchange-backend.onrender.com');
         socket.on('priceUpdate', (prices) => {
             prices.forEach(p => { const meme = memes.find(m => m.id === p.id); if (meme) { meme.price = p.price; meme.change_24h = p.change_24h; } });
             renderAssets();
