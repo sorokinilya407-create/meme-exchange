@@ -71,5 +71,6 @@ router.post('/logout', (req, res) => {
     res.clearCookie('token');
     res.json({ success: true });
 });
+res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'strict' });
 
 module.exports = router;
