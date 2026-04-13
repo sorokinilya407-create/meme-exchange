@@ -1105,6 +1105,15 @@ async function loadBalance() {
             await loadBalance(); await loadMemes(); await loadHistory(); closeModal();
         } catch (e) { showToast(e.message, false); }
     }
+    async function checkAuth() {
+    try {
+        await apiRequest('/api/user/profile');
+        return true;
+    } catch (e) {
+        window.location.href = '/login.html';
+        return false;
+    }
+}
 
     async function init() {
         if (!await checkAuth()) return;
