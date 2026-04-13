@@ -5,9 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "reset-daily": "node scripts/resetDailyChanges.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -18,7 +16,8 @@
     "express-rate-limit": "^6.10.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.1.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.1",
     "pg": "^8.11.3",
     "socket.io": "^4.7.2"
   },
