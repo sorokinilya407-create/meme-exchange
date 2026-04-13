@@ -27,7 +27,7 @@ router.post('/register', async (req, res) => {
             [username, email, hashed, verificationCode, codeExpires]
         );
 
-        await sendVerificationCode(email, verificationCode);
+        // await sendVerificationCode(email, verificationCode);
         res.json({ success: true, message: 'Код отправлен на email', email });
     } catch (err) {
         console.error('Register error:', err);
