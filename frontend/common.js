@@ -1,3 +1,5 @@
+const API_BASE = 'https://meme-exchange-backend.onrender.com';
+
 let currentUser = null;
 
 function showToast(msg, success = true) {
@@ -9,14 +11,17 @@ function showToast(msg, success = true) {
     setTimeout(() => toast.remove(), 3000);
 }
 
-
 async function apiRequest(url, method = 'GET', body = null) {
-    const fullUrl = url.startsWith('/api') ? 'https://meme-exchange-backend.onrender.com' + url : url;
-    const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
+    const fullUrl = url.startsWith('/api') ? API_BASE + url : url;
+    const opts = {
+        method,
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+    };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(fullUrl, opts);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Îøèáêà');
+    if (!res.ok) throw new Error(data.error || 'Request failed');
     return data;
 }
 
@@ -39,11 +44,7 @@ async function checkAuth() {
         loadBalance();
         return user;
     } catch (e) {
-       // window.location.href = '/login.html';
+        window.location.href = '/login.html';
         return null;
     }
 }
-
-
-
-
