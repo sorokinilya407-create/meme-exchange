@@ -10,11 +10,21 @@ const { Server } = require('socket.io');
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: process.env.CLIENT_URL || 'http://localhost:3000', credentials: true }
+  cors: { 
+    origin: process.env.CLIENT_URL || 'https://meme-exchange-frontend.onrender.com', 
+    credentials: true 
+  }
 });
 
+// Безопасность
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000', credentials: true }));
+
+// CORS с поддержкой credentials (ВАЖНО ДЛЯ КУК)
+app.use(cors({ 
+    origin: process.env.CLIENT_URL || 'https://meme-exchange-frontend.onrender.com', 
+    credentials: true 
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 
@@ -32,16 +42,16 @@ app.use('/api/portfolio', require('./routes/portfolio'));
 app.use('/api/quests', require('./routes/quests'));
 app.use('/api/profile', require('./routes/profile'));
 
-// Отдача фронтенда (исправленный путь)
-app.use(express.static(path.join(__dirname, 'frontend')));
-
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // 404 для API
 app.use('/api/*', (req, res) => res.status(404).json({ error: 'API endpoint not found' }));
 
-// Все остальные запросы — на index.html (SPA)
+// Отдача фронтенда (если нужна)
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// Все остальные запросы — на index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
