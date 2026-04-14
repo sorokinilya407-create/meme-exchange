@@ -16,7 +16,7 @@ async function apiRequest(url, method = 'GET', body = null) {
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(fullUrl, opts);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Œ¯Ë·Í‡');
+    if (!res.ok) throw new Error(data.error || '√é√∏√®√°√™√†');
     return data;
 }
 
@@ -39,7 +39,7 @@ async function checkAuth() {
         loadBalance();
         return user;
     } catch (e) {
-        window.location.href = '/login.html';
+       // window.location.href = '/login.html';
         return null;
     }
 }
