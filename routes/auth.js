@@ -37,7 +37,7 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Неверный email или пароль' });
         }
         const token = jwt.sign({ userId: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'strict' });
+        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict' });
         res.json({ success: true, username: user.rows[0].username, balance: user.rows[0].balance });
     } catch (err) {
         console.error('Login error:', err);
