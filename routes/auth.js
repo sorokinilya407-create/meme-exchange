@@ -13,12 +13,12 @@ router.post('/register', async (req, res) => {
         }
         const hashed = await bcrypt.hash(password, 12);
         const result = await db.query(
-            'INSERT INTO users (username, email, password_hash, balance, is_verified) VALUES ($1, $2, $3, 10000, true) RETURNING id',
+            'INSERT INTO users (username, email, password_hash, balance, is_verified) VALUES ($1, $2, $3, 10000, true) RETURNING id, username',
             [username, email, hashed]
         );
         const token = jwt.sign({ userId: result.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'lax' });
-        res.json({ success: true, username, balance: 10000 });
+        res.json({ success: true, username: result.rows[0].username, balance: 10000 });
     } catch (err) {
         console.error('Register error:', err);
         res.status(500).json({ error: 'Ошибка сервера' });
