@@ -156,7 +156,18 @@
     function showToast(msg, ok=true){ const t=document.createElement('div'); t.className='toast'; t.style.background=ok?'#00FF88':'#FF3366'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
     async function apiRequest(url, method='GET', body=null){ const u=url.startsWith('/api')?API_BASE+url:url; const o={method, credentials:'include', headers:{'Content-Type':'application/json'}}; if(body) o.body=JSON.stringify(body); const r=await fetch(u,o); const d=await r.json(); if(!r.ok) throw new Error(d.error||'Ошибка'); return d; }
     async function loadBalance(){ try{ const d=await apiRequest('/api/user/balance'); document.getElementById('balanceDisplay').innerHTML=`<i class="fas fa-coins"></i> ${d.balance.toLocaleString()} MC`; return d.balance; }catch(e){return null;} }
-    async function checkAuth(){ try{ await apiRequest('/api/user/profile'); return true; }catch(e){ window.location.href='/login.html'; return false; } }
+    async function checkAuth(){ 
+    try{ 
+        console.log('🔐 checkAuth: пробую получить профиль...');
+        await apiRequest('/api/user/profile'); 
+        console.log('✅ checkAuth: профиль получен');
+        return true; 
+    }catch(e){ 
+        console.error('❌ checkAuth: ошибка, редирект на логин. Причина:', e.message);
+        window.location.href='/login.html'; 
+        return false; 
+    } 
+}
     function getMemeDisplay(m){ if(m.image_url) return `<img src="${m.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`; return m.icon||'📦'; }
     let selectedImageData=null, memeType='emoji';
     async function loadMemes(){ try{ const m=await apiRequest('/api/memes'); const c=document.getElementById('memesContainer'); if(!m.length){ c.innerHTML='<div class="text-muted" style="padding:20px;">Нет мемов</div>'; return; } c.innerHTML=m.slice(0,4).map(x=>{ const p=Number(x.price), ch=Number(x.change_24h); return `<div class="meme-card"><div class="meme-row"><div class="meme-info"><div class="meme-icon">${getMemeDisplay(x)}</div><div><h4>${x.name}</h4><span class="meme-ticker">${x.name}</span></div></div><div class="meme-price-info"><div class="meme-price">${p.toFixed(0)} MC</div><div class="${ch>=0?'change-positive':'change-negative'}">${ch>=0?'▲':'▼'}${Math.abs(ch).toFixed(1)}%</div></div></div><div class="trade-buttons"><button class="btn-buy" data-id="${x.id}" data-price="${p}">Купить</button><button class="btn-sell" data-id="${x.id}">Продать</button></div></div>`; }).join(''); document.querySelectorAll('.btn-buy').forEach(b=>b.addEventListener('click', async()=>{ try{ await apiRequest('/api/trades/buy','POST',{memeId:b.dataset.id,quantity:1}); showToast(`✅ Куплено за ${b.dataset.price} MC`,true); loadBalance(); loadMemes(); }catch(e){ showToast(e.message,false); } })); document.querySelectorAll('.btn-sell').forEach(b=>b.addEventListener('click',()=>showToast('Продажа в портфеле',false))); }catch(e){ console.error(e); } }
