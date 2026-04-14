@@ -36,7 +36,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
         const data = await res.json();
         if (res.ok) {
             showToast('Регистрация успешна!', true);
-            window.location.href = '/index.html';
+           // window.location.href = '/index.html';
         } else {
             showToast(data.error, false);
         }
